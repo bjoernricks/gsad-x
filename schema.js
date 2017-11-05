@@ -26,10 +26,14 @@ const {
   GraphQLString,
 } = require('graphql');
 
-module.exports = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'Query',
-  }),
+const query_type = new GraphQLObjectType({
+  name: 'Query',
+  fields: {
+    id: {type: GraphQLString},
+    name: {type: GraphQLString},
+  },
 });
+
+module.exports = new GraphQLSchema({query: query_type});
 
 // vim: set ts=2 sw=2 tw=80:

@@ -80,7 +80,11 @@ class Gmp {
 
   getTasks() {
     const task = {
-      get_tasks: '',
+      get_tasks: {
+        $: {
+          details: 1,
+        }
+      },
     };
     return this._send(task);
   }

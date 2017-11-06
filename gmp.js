@@ -20,6 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+const fs = require('fs');
 const promisify = require('es6-promisify');
 const xml2js = require('xml2js')
 
@@ -28,7 +29,13 @@ const builder = new xml2js.Builder();
 
 const Socket = require('./socket');
 
-const MANAGER_SOCKET_PATH = '/home/bricks/install/trunk/var/run/gvmd.sock';
+let config = {
+  GVMD_SOCKET_PATH: '',
+};
+
+if (fs.existsSync('./config.js')) {
+  config = require('./config.js');
+}
 
 class Gmp {
 
@@ -37,7 +44,7 @@ class Gmp {
   }
 
   connect() {
-    return this.socket.connect({path: MANAGER_SOCKET_PATH}).then(() => {
+    return this.socket.connect({path: config.GVMD_SOCKET_PATH}).then(() => {
       console.log('connected to manager');
     });
   }

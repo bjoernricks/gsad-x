@@ -30,62 +30,87 @@ class Socket {
     this.socket.setEncoding('UTF-8');
   }
 
-  read(...args) {
-    const socket = this.socket;
-
+  connect(...args) {
     return new Promise((resolve, reject) => {
-      if (!socket.readable || socket.closed || socket.destroyed) {
+      if (this.socket.destroyed) {
+        reject(new Error('socket already destroyed'));
+      }
+
+      const onError =  err => {
+        this.socket.removeListener('error', onError);
+        this.socket.removeListener('connect', onConnected);
+
+        reject(err);
+      };
+
+      const onConnected = () => {
+        this.socket.removeListener('error', onError);
+        this.socket.removeListener('connect', onConnected);
+
+        resolve();
+      };
+
+      this.socket.once('error', onError);
+      this.socket.once('connect', onConnected);
+
+      this.socket.connect(...args)
+    });
+  }
+
+  read(...args) {
+    return new Promise((resolve, reject) => {
+      if (!this.socket.readable || this.socket.closed ||
+        this.socket.destroyed) {
         return resolve();
       }
 
       const onReadable = () => {
-        let chunk = socket.read(...args);
+        let chunk = this.socket.read(...args);
 
         if (chunk != null) {
-          socket.removeListener('close', onceClose);
-          socket.removeListener('error', onceError);
-          socket.removeListener('end', onceEnd);
-          socket.removeListener('readable', onReadable);
+          this.socket.removeListener('close', onceClose);
+          this.socket.removeListener('error', onceError);
+          this.socket.removeListener('end', onceEnd);
+          this.socket.removeListener('readable', onReadable);
           resolve(chunk);
         }
       }
 
       const onceClose = () => {
-        socket.removeListener('end', onceEnd);
-        socket.removeListener('error', onceError);
-        socket.removeListener('readable', onReadable);
-        resolve(socket.bytesWritten || 0)
+        this.socket.removeListener('end', onceEnd);
+        this.socket.removeListener('error', onceError);
+        this.socket.removeListener('readable', onReadable);
+        resolve();
 
       }
 
       const onceEnd = () => {
-        socket.removeListener('close', onceClose);
-        socket.removeListener('error', onceError);
-        socket.removeListener('readable', onReadable);
+        this.socket.removeListener('close', onceClose);
+        this.socket.removeListener('error', onceError);
+        this.socket.removeListener('readable', onReadable);
         resolve();
       }
 
       const onceError = err => {
-        socket.removeListener('close', onceClose);
-        socket.removeListener('end', onceEnd);
-        socket.removeListener('readable', onReadable);
+        this.socket.removeListener('close', onceClose);
+        this.socket.removeListener('end', onceEnd);
+        this.socket.removeListener('readable', onReadable);
         reject(err);
       }
 
-      socket.once('close', onceClose);
-      socket.on('readable', onReadable);
-      socket.once('end', onceEnd);
-      socket.once('error', onceError);
+      this.socket.once('close', onceClose);
+      this.socket.on('readable', onReadable);
+      this.socket.once('end', onceEnd);
+      this.socket.once('error', onceError);
 
       onReadable();
     });
   }
 
-  write(...args) {
-    const socket = this.socket
-
+  write(data, encoding) {
     return new Promise((resolve, reject) => {
-      if (!socket.writable || socket.closed || socket.destroyed) {
+      if (!this.socket.writable || this.socket.closed ||
+        this.socket.destroyed) {
         return reject(new Error(`write after end`));
       }
 
@@ -94,41 +119,43 @@ class Socket {
         reject(err);
       }
 
-      socket.once('error', onceError);
+      this.socket.once('error', onceError);
 
-      if (socket.write(...args)) {
-        socket.removeListener('error', onceError);
+      if (this.socket.write(data, encoding)) {
+        this.socket.removeListener('error', onceError);
         if (!this._errored) {
-          resolve(chunk.length);
+          resolve(data.length);
         }
       } else {
         const onceDrain = () => {
-          socket.removeListener('close', onceClose);
-          socket.removeListener('finish', onceFinish);
-          socket.removeListener('error', onceError);
-          resolve(chunk.length);
+          this.socket.removeListener('close', onceClose);
+          this.socket.removeListener('finish', onceFinish);
+          this.socket.removeListener('error', onceError);
+          resolve(data.length);
         }
 
         const onceClose = () => {
-          socket.removeListener('drain', onceDrain);
-          socket.removeListener('error', onceError);
-          socket.removeListener('finish', onceFinish);
-          resolve(chunk.length);
+          this.socket.removeListener('drain', onceDrain);
+          this.socket.removeListener('error', onceError);
+          this.socket.removeListener('finish', onceFinish);
+          resolve(data.length);
         }
 
         const onceFinish = () => {
-          socket.removeListener('close', onceClose);
-          socket.removeListener('drain', onceDrain);
-          socket.removeListener('error', onceError);
-          resolve(chunk.length)
+          this.socket.removeListener('close', onceClose);
+          this.socket.removeListener('drain', onceDrain);
+          this.socket.removeListener('error', onceError);
+          resolve(data.length)
         }
 
-        socket.once('close', onceClose);
-        socket.once('drain', onceDrain);
-        socket.once('finish', onceFinish);
+        this.socket.once('close', onceClose);
+        this.socket.once('drain', onceDrain);
+        this.socket.once('finish', onceFinish);
       }
     })
   }
 }
+
+module.exports = Socket;
 
 // vim: set ts=2 sw=2 tw=80:

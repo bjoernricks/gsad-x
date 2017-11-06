@@ -50,7 +50,9 @@ class Gmp {
   }
 
   _send(obj) {
-    return this.socket.write(builder.buildObject(obj))
+    const xml = builder.buildObject(obj);
+    console.log(xml);
+    return this.socket.write(xml)
       .then(() => this.socket.read())
       .then(data => {
         console.log(data);

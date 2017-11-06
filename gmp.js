@@ -20,32 +20,35 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-const net = require('net');
-
 const promisify = require('es6-promisify');
 const xml2js = require('xml2js')
 
 const x2js = promisify(xml2js.parseString);
 const builder = new xml2js.Builder();
 
+const Socket = require('./socket');
+
 const MANAGER_SOCKET_PATH = '/home/bricks/install/trunk/var/run/gvmd.sock';
 
 class Gmp {
 
   constructor() {
-    this.socket = new net.Socket()
-    this.socket.setEncoding('UTF-8');
-
-    this.socket.on('data', data => console.log(data));
-    this.socket.on('end', () => console.log('connection ended'));
-    this.socket.on('close', () => console.log('connection closed'));
+    this.socket = new Socket()
   }
 
   connect() {
-    const connect = promisify(this.socket.connect, this.socket);
-    return connect({path: MANAGER_SOCKET_PATH}).then(() => {
+    return this.socket.connect({path: MANAGER_SOCKET_PATH}).then(() => {
       console.log('connected to manager');
     });
+  }
+
+  _send(obj) {
+    return this.socket.write(builder.buildObject(obj))
+      .then(() => this.socket.read())
+      .then(data => {
+        console.log(data);
+        return x2js(data);
+      });
   }
 
   auth(username, password) {
@@ -58,10 +61,25 @@ class Gmp {
       },
     };
 
-    const write = promisify(this.socket.write, this.socket);
-    return write(builder.buildObject(auth));
+    return this._send(auth).then(obj => {
+      const resp = obj.authenticate_response;
+      if (resp.$.status !== '200') {
+        throw Error(resp.$.status_text);
+      }
+    });
+  }
+
+  getTasks() {
+    const task = {
+      get_tasks: '',
+    };
+    return this._send(task);
   }
 }
 
 const client = new Gmp();
-client.connect().then(() => client.auth('foo', 'bar'));
+client.connect()
+  .then(() => client.auth('foo', 'bar'))
+  .then(() => client.getTasks())
+  .then(data => console.log(data))
+  .catch(err => console.error(err));

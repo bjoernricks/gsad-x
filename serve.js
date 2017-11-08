@@ -24,12 +24,22 @@ const express = require('express');
 const graphqlHTTP = require('express-graphql');
 
 const schema = require('./schema');
+const Gmp = require('./gmp');
 
 const app = express();
 
-app.use('/graphql', graphqlHTTP({
-  schema,
-  graphiql: true,
+app.use('/graphql', graphqlHTTP(request => {
+  const gmp = new Gmp();
+  return gmp.connect().then(() => gmp.auth('foo', 'bar')).then(() => {
+    return {
+      context: {
+        request,
+        gmp,
+      },
+      schema,
+      graphiql: true,
+    };
+  });
 }));
 
 app.listen(4000);

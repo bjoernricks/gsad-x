@@ -21,19 +21,48 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 const {
-  GraphQLSchema,
+  GraphQLID,
+  GraphQLList,
   GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLSchema,
   GraphQLString,
 } = require('graphql');
 
-const query_type = new GraphQLObjectType({
+const taskType = new GraphQLObjectType({
+  name: 'Task',
+  fields: {
+    id: {
+      type: GraphQLID,
+      resolve: xml => {
+        return xml.$.id;
+      },
+    },
+    name: {
+      type: GraphQLString,
+      resolve: xml => {
+        return xml.name[0];
+      },
+    },
+  }
+})
+
+const queryType = new GraphQLObjectType({
   name: 'Query',
   fields: {
-    id: {type: GraphQLString},
-    name: {type: GraphQLString},
+    getTasks: {
+      type: new GraphQLList(taskType),
+      resolve: (source, args, context, info) => {
+        const {gmp} = context;
+        return gmp.getTasks().then(data => {
+          const tasks = data.get_tasks_response.task;
+          return tasks;
+        });
+      },
+    },
   },
 });
 
-module.exports = new GraphQLSchema({query: query_type});
+module.exports = new GraphQLSchema({query: queryType});
 
 // vim: set ts=2 sw=2 tw=80:

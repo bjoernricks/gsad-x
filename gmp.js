@@ -76,6 +76,7 @@ class Gmp {
       if (resp.$.status !== '200') {
         throw Error(resp.$.status_text);
       }
+      return this;
     });
   }
 

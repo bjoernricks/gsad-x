@@ -92,9 +92,4 @@ class Gmp {
   }
 }
 
-const client = new Gmp();
-client.connect()
-  .then(() => client.auth('foo', 'bar'))
-  .then(() => client.getTasks())
-  .then(data => console.log(data))
-  .catch(err => console.error(err));
+module.exports = Gmp;

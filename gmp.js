@@ -23,6 +23,7 @@
 const fs = require('fs');
 const promisify = require('es6-promisify');
 const xml2js = require('xml2js')
+const chalk = require('chalk');
 
 const x2js = promisify(xml2js.parseString);
 const builder = new xml2js.Builder();
@@ -45,17 +46,17 @@ class Gmp {
 
   connect() {
     return this.socket.connect({path: config.GVMD_SOCKET_PATH}).then(() => {
-      console.log('connected to manager');
+      console.log(chalk.green('connected to manager'));
     });
   }
 
   _send(obj) {
     const xml = builder.buildObject(obj);
-    console.log(xml);
+    console.log(chalk.green('request'), xml);
     return this.socket.write(xml)
       .then(() => this.socket.read())
       .then(data => {
-        console.log(data);
+        console.log(chalk.green('response'), data);
         return x2js(data);
       });
   }

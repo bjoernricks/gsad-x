@@ -26,7 +26,7 @@ const xml2js = require('xml2js')
 const chalk = require('chalk');
 
 const x2js = promisify(xml2js.parseString);
-const builder = new xml2js.Builder();
+const builder = new xml2js.Builder({headless: true});
 
 const Socket = require('./socket');
 

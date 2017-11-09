@@ -68,6 +68,17 @@ const configType = new GraphQLObjectType({
   },
 });
 
+const scannerType = new GraphQLObjectType({
+  name: 'Scanner',
+  description: 'A Scanner',
+  fields: {
+    id: idFieldType,
+    name: nameFieldType,
+    comment: commentFieldType,
+    owner: ownerFieldType,
+  },
+});
+
 const taskType = new GraphQLObjectType({
   name: 'Task',
   description: 'A Task',
@@ -82,7 +93,15 @@ const taskType = new GraphQLObjectType({
         return gmp.getScanConfig(xml.config[0].$.id).then(data =>
           data.get_configs_response.config[0]
         );
-      }
+      },
+    },
+    scanner: {
+      type: scannerType,
+      resolve: (xml, args, {gmp}) => {
+        return gmp.getScanner(xml.scanner[0].$.id).then(data =>
+          data.get_scanners_response.scanner[0]
+        );
+      },
     }
   },
 });

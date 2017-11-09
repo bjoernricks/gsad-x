@@ -29,51 +29,53 @@ const {
   GraphQLString,
 } = require('graphql');
 
+const commentFieldType = {
+  type: GraphQLString,
+  resolve: xml => xml.comment[0],
+};
+
+const idFieldType = {
+  type: GraphQLID,
+  resolve: xml => xml.$.id,
+};
+
+const nameFieldType = {
+  type: GraphQLString,
+  resolve: xml => xml.name[0],
+};
+
 const ownerType = new GraphQLObjectType({
   name: 'Owner',
   description: 'The owner of the entity',
   fields: {
-    name: {
-      type: GraphQLString,
-      resolve: xml => xml.name[0],
-    },
+    name: nameFieldType,
   },
 });
+
+const ownerFieldType = {
+  type: ownerType,
+  resolve: xml => xml.owner[0],
+};
 
 const configType = new GraphQLObjectType({
   name: 'ScanConfig',
   description: 'A Scan Config',
   fields: {
-    id: {
-      type: GraphQLID,
-      resolve: xml => xml.$.id,
-    },
-    name: {
-      type: GraphQLString,
-      resolve: xml => xml.name[0],
-    },
-    owner: {
-      type: ownerType,
-      resolve: xml => xml.owner[0],
-    },
+    id: idFieldType,
+    name: nameFieldType,
+    owner: ownerFieldType,
+    comment: commentFieldType,
   },
 });
 
 const taskType = new GraphQLObjectType({
   name: 'Task',
+  description: 'A Task',
   fields: {
-    id: {
-      type: GraphQLID,
-      resolve: xml => xml.$.id,
-    },
-    name: {
-      type: GraphQLString,
-      resolve: xml => xml.name[0],
-    },
-    owner: {
-      type: ownerType,
-      resolve: xml => xml.owner[0],
-    },
+    id: idFieldType,
+    name: nameFieldType,
+    comment: commentFieldType,
+    owner: ownerFieldType,
     config: {
       type: configType,
       resolve: (xml, args, {gmp}) => {

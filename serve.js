@@ -29,23 +29,21 @@ const Gmp = require('./gmp');
 const app = express();
 
 app.use('/graphql', graphqlHTTP(request => {
-  const gmp = new Gmp();
-  return gmp.connect().then(() => gmp.auth('foo', 'bar')).then(() => {
-    return {
-      context: {
-        request,
-        gmp,
-      },
-      schema,
-      graphiql: true,
-      formatError: error => ({
-        message: error.message,
-        locations: error.locations,
-        stack: error.stack,
-        path: error.path,
-      }),
-    };
-  });
+  const gmp = new Gmp('foo', 'bar');
+  return {
+    context: {
+      request,
+      gmp,
+    },
+    schema,
+    graphiql: true,
+    formatError: error => ({
+      message: error.message,
+      locations: error.locations,
+      stack: error.stack,
+      path: error.path,
+    }),
+  };
 }));
 
 app.listen(4000);

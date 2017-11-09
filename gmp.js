@@ -166,6 +166,16 @@ class Gmp {
       },
     });
   }
+
+  getScanner(id) {
+    return this._send({
+      get_scanners: {
+        $: {
+          scanner_id: id,
+        },
+      },
+    });
+  }
 }
 
 module.exports = Gmp;

@@ -156,6 +156,16 @@ class Gmp {
     };
     return this._send(task);
   }
+
+  getScanConfig(id) {
+    return this._send({
+      get_configs: {
+        $: {
+          config_id: id,
+        },
+      },
+    });
+  }
 }
 
 module.exports = Gmp;

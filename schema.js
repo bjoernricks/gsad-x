@@ -29,23 +29,61 @@ const {
   GraphQLString,
 } = require('graphql');
 
+const ownerType = new GraphQLObjectType({
+  name: 'Owner',
+  description: 'The owner of the entity',
+  fields: {
+    name: {
+      type: GraphQLString,
+      resolve: xml => xml.name[0],
+    },
+  },
+});
+
+const configType = new GraphQLObjectType({
+  name: 'ScanConfig',
+  description: 'A Scan Config',
+  fields: {
+    id: {
+      type: GraphQLID,
+      resolve: xml => xml.$.id,
+    },
+    name: {
+      type: GraphQLString,
+      resolve: xml => xml.name[0],
+    },
+    owner: {
+      type: ownerType,
+      resolve: xml => xml.owner[0],
+    },
+  },
+});
+
 const taskType = new GraphQLObjectType({
   name: 'Task',
   fields: {
     id: {
       type: GraphQLID,
-      resolve: xml => {
-        return xml.$.id;
-      },
+      resolve: xml => xml.$.id,
     },
     name: {
       type: GraphQLString,
-      resolve: xml => {
-        return xml.name[0];
-      },
+      resolve: xml => xml.name[0],
     },
-  }
-})
+    owner: {
+      type: ownerType,
+      resolve: xml => xml.owner[0],
+    },
+    config: {
+      type: configType,
+      resolve: (xml, args, {gmp}) => {
+        return gmp.getScanConfig(xml.config[0].$.id).then(data =>
+          data.get_configs_response.config[0]
+        );
+      }
+    }
+  },
+});
 
 const queryType = new GraphQLObjectType({
   name: 'Query',

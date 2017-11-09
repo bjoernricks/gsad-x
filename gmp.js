@@ -38,45 +38,111 @@ if (fs.existsSync('./config.js')) {
   config = require('./config.js');
 }
 
-class Gmp {
+class GmpConnection {
 
-  constructor() {
+  constructor(username, password, id) {
+    this._username = username;
+    this._password = password;
+
+    this._connected = false;
+    this._authenticated = false;
+
     this.socket = new Socket()
+
+    this.id = 'connection-' + id;
   }
 
   connect() {
+    if (this._connected) {
+      return Promise.resolve(this);
+    }
+
     return this.socket.connect({path: config.GVMD_SOCKET_PATH}).then(() => {
-      console.log(chalk.green('connected to manager'));
+      this._connected = true;
+
+      console.log(chalk.blue(this.id), chalk.green('connected to manager'));
+
+      return this;
     });
   }
 
-  _send(obj) {
-    const xml = builder.buildObject(obj);
-    console.log(chalk.green('request'), xml);
-    return this.socket.write(xml)
-      .then(() => this.socket.read())
-      .then(data => {
-        console.log(chalk.green('response'), data);
-        return x2js(data);
-      });
-  }
+  auth() {
+    if (this._authenticated) {
+      return Promise.resolve(this);
+    }
 
-  auth(username, password) {
     const auth = {
       authenticate: {
         credentials: {
-          username,
-          password,
+          username: this._username,
+          password: this._password,
         },
       },
     };
 
-    return this._send(auth).then(obj => {
+    return this.send(auth).then(obj => {
       const resp = obj.authenticate_response;
+
       if (resp.$.status !== '200') {
         throw Error(resp.$.status_text);
       }
+
+      this._authenticated = true;
+
       return this;
+    });
+  }
+
+  send(obj) {
+    const xml = builder.buildObject(obj);
+
+    console.log(chalk.blue(this.id), chalk.green('request'), xml);
+
+    return this.connect()
+      .then(() => this.socket.write(xml))
+      .then(() => this.socket.read())
+      .then(data => {
+        console.log(chalk.blue(this.id), chalk.green('response'), data);
+        return x2js(data);
+      });
+  }
+
+  sendAuthenticated(obj) {
+    return this.auth().then(() => this.send(obj));
+  }
+}
+
+class Gmp {
+
+  constructor(username, password) {
+    this._username = username;
+    this._password = password;
+    this._connection_count = 1;
+
+    this._connections = [
+      new GmpConnection(username, password, this._connection_count),
+    ];
+  }
+
+  _getConnection() {
+    if (this._connections.length > 0) {
+      return this._connections.pop();
+    }
+    return this._newConnection();
+  }
+
+  _newConnection() {
+    this._connection_count += 1;
+    return new GmpConnection(this._username, this._password,
+      this._connection_count);
+  }
+
+  _send(data) {
+    const connection = this._getConnection();
+
+    return connection.sendAuthenticated(data).then(data => {
+      this._connections.unshift(connection);
+      return data;
     });
   }
 

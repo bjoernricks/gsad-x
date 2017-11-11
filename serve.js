@@ -25,15 +25,19 @@ const graphqlHTTP = require('express-graphql');
 
 const schema = require('./schema');
 const Gmp = require('./gmp');
+const loader = require('./loader');
 
 const app = express();
 
 app.use('/graphql', graphqlHTTP(request => {
   const gmp = new Gmp('foo', 'bar');
+
   return {
     context: {
       request,
       gmp,
+      scanConfigLoader: loader(gmp, 'getScanConfig'),
+      scannerLoader: loader(gmp, 'getScanner'),
     },
     schema,
     graphiql: true,

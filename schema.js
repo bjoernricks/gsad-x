@@ -89,16 +89,16 @@ const taskType = new GraphQLObjectType({
     owner: ownerFieldType,
     config: {
       type: configType,
-      resolve: (xml, args, {gmp}) => {
-        return gmp.getScanConfig(xml.config[0].$.id).then(data =>
+      resolve: (xml, args, {scanConfigLoader}) => {
+        return scanConfigLoader.load(xml.config[0].$.id).then(data =>
           data.get_configs_response.config[0]
         );
       },
     },
     scanner: {
       type: scannerType,
-      resolve: (xml, args, {gmp}) => {
-        return gmp.getScanner(xml.scanner[0].$.id).then(data =>
+      resolve: (xml, args, {scannerLoader}) => {
+        return scannerLoader.load(xml.scanner[0].$.id).then(data =>
           data.get_scanners_response.scanner[0]
         );
       },

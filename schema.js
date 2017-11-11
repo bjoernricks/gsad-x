@@ -65,6 +65,10 @@ const configType = new GraphQLObjectType({
     name: nameFieldType,
     owner: ownerFieldType,
     comment: commentFieldType,
+    config_type: {
+      type: GraphQLString,
+      resolve: xml => xml.type[0],
+    }
   },
 });
 

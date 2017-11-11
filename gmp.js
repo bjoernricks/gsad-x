@@ -176,6 +176,16 @@ class Gmp {
       },
     });
   }
+
+  getTarget(id) {
+    return this._send({
+      get_targets: {
+        $: {
+          target_id: id,
+        },
+      },
+    });
+  }
 }
 
 module.exports = Gmp;

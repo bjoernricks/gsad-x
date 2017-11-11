@@ -36,6 +36,7 @@ app.use('/graphql', graphqlHTTP(request => {
     context: {
       request,
       gmp,
+      targetLoader: loader(gmp, 'getTarget'),
       scanConfigLoader: loader(gmp, 'getScanConfig'),
       scannerLoader: loader(gmp, 'getScanner'),
     },

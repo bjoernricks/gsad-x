@@ -83,6 +83,17 @@ const scannerType = new GraphQLObjectType({
   },
 });
 
+const targetType = new GraphQLObjectType({
+  name: 'Target',
+  description: 'A Target',
+  fields: {
+    id: idFieldType,
+    name: nameFieldType,
+    comment: commentFieldType,
+    owner: ownerFieldType,
+  },
+});
+
 const taskType = new GraphQLObjectType({
   name: 'Task',
   description: 'A Task',
@@ -106,7 +117,15 @@ const taskType = new GraphQLObjectType({
           data.get_scanners_response.scanner[0]
         );
       },
-    }
+    },
+    target: {
+      type: targetType,
+      resolve: (xml, args, {targetLoader}) => {
+        return targetLoader.load(xml.target[0].$.id).then(data =>
+          data.get_targets_response.target[0]
+        );
+      },
+    },
   },
 });
 

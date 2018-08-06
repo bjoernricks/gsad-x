@@ -178,6 +178,17 @@ const queryType = new GraphQLObjectType({
         });
       },
     },
+    getTask: {
+      type: taskType,
+      args: {
+        id: {
+          type: GraphQLID,
+          description: 'ID of the task'
+        },
+      },
+      resolve: (source, args, {gmp}) => gmp.getTask(args.id)
+        .then(data => data.get_tasks_response.task[0]),
+    },
   },
 });
 

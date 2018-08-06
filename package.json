@@ -16,5 +16,8 @@
     "sax": "^1.2.4",
     "socketize": "^1.0.1",
     "xml2js": "^0.4.19"
+  },
+  "scripts": {
+    "start": "node serve.js"
   }
 }

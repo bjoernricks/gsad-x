@@ -30,13 +30,12 @@ const Socket = require('socketize');
 const x2js = promisify(xml2js.parseString);
 const builder = new xml2js.Builder({headless: true});
 
-
-let config = {
-  GVMD_SOCKET_PATH: '',
-};
-
+let config;
 if (fs.existsSync('./config.js')) {
   config = require('./config.js');
+}
+else {
+  throw new Error('Please provide a `config.js`. See config.example.js.');
 }
 
 class Parser {

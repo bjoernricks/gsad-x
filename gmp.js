@@ -24,11 +24,12 @@ const fs = require('fs');
 const promisify = require('es6-promisify');
 const xml2js = require('xml2js')
 const chalk = require('chalk');
+const sax = require('sax');
+const Socket = require('socketize');
 
 const x2js = promisify(xml2js.parseString);
 const builder = new xml2js.Builder({headless: true});
 
-const Socket = require('./socket');
 
 let config = {
   GVMD_SOCKET_PATH: '',

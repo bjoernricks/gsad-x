@@ -95,6 +95,8 @@ class GmpConnection {
       console.log(chalk.blue(this.id), chalk.green('connected to manager'));
 
       return this;
+    }).catch(err => {
+        console.log(chalk.red('Could not connect to manager', err));
     });
   }
 

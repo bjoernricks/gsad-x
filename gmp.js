@@ -231,6 +231,16 @@ class Gmp {
       },
     });
   }
+
+  getReport(id) {
+    return this._send({
+      get_reports: {
+        $: {
+          report_id: id,
+        },
+      },
+    });
+  }
 }
 
 module.exports = Gmp;

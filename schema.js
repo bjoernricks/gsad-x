@@ -94,6 +94,14 @@ const targetType = new GraphQLObjectType({
   },
 });
 
+const reportType = new GraphQLObjectType({
+  name: 'Report',
+  description: 'A Report',
+  fields: {
+    id: idFieldType,
+  },
+});
+
 const taskType = new GraphQLObjectType({
   name: 'Task',
   description: 'A Task',

@@ -137,10 +137,7 @@ class GmpConnection {
     return this.connect()
       .then(() => this.socket.write(xml))
       .then(() => this.socket.read(parser.read, parser.isDone))
-      .then(data => {
-        console.log(chalk.blue(this.id), chalk.green('response'), data);
-        return x2js(data);
-      });
+      .then(data => x2js(data));
   }
 
   sendAuthenticated(obj) {

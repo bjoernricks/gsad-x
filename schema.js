@@ -102,7 +102,7 @@ const taskType = new GraphQLObjectType({
     name: nameFieldType,
     comment: commentFieldType,
     owner: ownerFieldType,
-    config: {
+    scanconfig: {
       type: configType,
       resolve: (xml, args, {scanConfigLoader}) => {
         return scanConfigLoader.load(xml.config[0].$.id).then(data =>

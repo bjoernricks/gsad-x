@@ -190,6 +190,18 @@ class Gmp {
     return this._send(task);
   }
 
+  getTask(id) {
+    const task = {
+      get_tasks: {
+        $: {
+          details: 1,
+          task_id: id,
+        }
+      },
+    };
+    return this._send(task);
+  }
+
   getScanConfig(id) {
     return this._send({
       get_configs: {

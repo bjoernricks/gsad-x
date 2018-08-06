@@ -39,6 +39,37 @@ if (fs.existsSync('./config.js')) {
   config = require('./config.js');
 }
 
+class Parser {
+  constructor() {
+    this.done = false;
+    this.parser = sax.parser(false);
+
+    this.parser.onopentag = node => {
+      if (this.first === undefined) {
+        this.first = node.name;
+      }
+    }
+
+    this.parser.onclosetag = name => {
+      if (this.first === name) {
+        this.done = true;
+      }
+    }
+
+    this.read = this.read.bind(this);
+    this.isDone = this.isDone.bind(this);
+  }
+
+  read(data = '', chunk) {
+    this.parser.write(chunk);
+    return data += chunk;
+  }
+
+  isDone() {
+    return this.done;
+  }
+}
+
 class GmpConnection {
 
   constructor(username, password, id) {
@@ -99,9 +130,11 @@ class GmpConnection {
 
     console.log(chalk.blue(this.id), chalk.green('request'), xml);
 
+    const parser = new Parser();
+
     return this.connect()
       .then(() => this.socket.write(xml))
-      .then(() => this.socket.read())
+      .then(() => this.socket.read(parser.read, parser.isDone))
       .then(data => {
         console.log(chalk.blue(this.id), chalk.green('response'), data);
         return x2js(data);

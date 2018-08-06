@@ -146,6 +146,22 @@ const taskType = new GraphQLObjectType({
         );
       },
     },
+    currentReport: {
+      type: reportType,
+      resolve: (xml, args, {reportLoader}) => {
+        const {current_report} = xml;
+        if (current_report === undefined || current_report.length === 0) {
+          return undefined;
+        }
+        const {id} = current_report[0].report[0].$;
+        if (id.length === 0) {
+          return undefined;
+        }
+        return reportLoader.load(id).then(data =>
+          data.get_reports_response.report[0]
+        );
+      },
+    },
   },
 });
 

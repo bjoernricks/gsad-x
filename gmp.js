@@ -30,14 +30,6 @@ const Socket = require('socketize');
 const x2js = promisify(xml2js.parseString);
 const builder = new xml2js.Builder({headless: true});
 
-let config;
-if (fs.existsSync('./config.js')) {
-  config = require('./config.js');
-}
-else {
-  throw new Error('Please provide a `config.js`. See config.example.js.');
-}
-
 class Parser {
   constructor() {
     this.done = false;
@@ -71,7 +63,8 @@ class Parser {
 
 class GmpConnection {
 
-  constructor(username, password, id) {
+  constructor(path, username, password, id) {
+    this._path = path;
     this._username = username;
     this._password = password;
 
@@ -88,7 +81,7 @@ class GmpConnection {
       return Promise.resolve(this);
     }
 
-    return this.socket.connect({path: config.GVMD_SOCKET_PATH}).then(() => {
+    return this.socket.connect({path: this._path}).then(() => {
       this._connected = true;
 
       console.log(chalk.blue(this.id), chalk.green('connected to manager'));
@@ -146,13 +139,14 @@ class GmpConnection {
 
 class Gmp {
 
-  constructor(username, password) {
+  constructor(path, username, password) {
+    this._path = path;
     this._username = username;
     this._password = password;
-    this._connection_count = 1;
+    this._connection_count = 0;
 
     this._connections = [
-      new GmpConnection(username, password, this._connection_count),
+      this._newConnection(),
     ];
   }
 
@@ -165,7 +159,7 @@ class Gmp {
 
   _newConnection() {
     this._connection_count += 1;
-    return new GmpConnection(this._username, this._password,
+    return new GmpConnection(this._path, this._username, this._password,
       this._connection_count);
   }
 

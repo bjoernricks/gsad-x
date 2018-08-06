@@ -20,6 +20,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+const fs = require('fs');
+
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
 
@@ -29,8 +31,17 @@ const loader = require('./loader');
 
 const app = express();
 
+let config;
+if (fs.existsSync('./config.js')) {
+  config = require('./config.js');
+}
+else {
+  throw new Error('Please provide a `config.js`. See config.example.js.');
+}
+
 app.use('/graphql', graphqlHTTP(request => {
-  const gmp = new Gmp('foo', 'bar');
+  const gmp = new Gmp(config.GVMD_SOCKET_PATH, config.USERNAME,
+    config.PASSWORD);
 
   return {
     context: {

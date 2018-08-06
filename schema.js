@@ -105,7 +105,11 @@ const taskType = new GraphQLObjectType({
     scanconfig: {
       type: configType,
       resolve: (xml, args, {scanConfigLoader}) => {
-        return scanConfigLoader.load(xml.config[0].$.id).then(data =>
+        const {id} = xml.config[0].$;
+        if (id.length === 0) {
+          return undefined;
+        }
+        return scanConfigLoader.load(id).then(data =>
           data.get_configs_response.config[0]
         );
       },
@@ -113,7 +117,11 @@ const taskType = new GraphQLObjectType({
     scanner: {
       type: scannerType,
       resolve: (xml, args, {scannerLoader}) => {
-        return scannerLoader.load(xml.scanner[0].$.id).then(data =>
+        const {id} = xml.scanner[0].$;
+        if (id.length === 0) {
+          return undefined;
+        }
+        return scannerLoader.load(id).then(data =>
           data.get_scanners_response.scanner[0]
         );
       },
@@ -121,7 +129,11 @@ const taskType = new GraphQLObjectType({
     target: {
       type: targetType,
       resolve: (xml, args, {targetLoader}) => {
-        return targetLoader.load(xml.target[0].$.id).then(data =>
+        const {id} = xml.target[0].$;
+        if (id.length === 0) {
+          return undefined;
+        }
+        return targetLoader.load(id).then(data =>
           data.get_targets_response.target[0]
         );
       },

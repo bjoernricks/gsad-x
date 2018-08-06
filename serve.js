@@ -53,6 +53,6 @@ app.use('/graphql', graphqlHTTP(request => {
 
 app.listen(4000);
 
-console.log('Running a GraphQL API server at localhost:4000/graphql');
+console.log('Running a GraphQL API server at http://localhost:4000/graphql');
 
 // vim: set ts=2 sw=2 tw=80:
